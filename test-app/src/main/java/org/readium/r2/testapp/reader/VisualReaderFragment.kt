@@ -253,6 +253,7 @@ abstract class VisualReaderFragment : BaseReaderFragment() {
                         is TtsViewModel.Event.OnError -> {
                             showError(event.error.toUserError())
                         }
+
                         is TtsViewModel.Event.OnMissingVoiceData ->
                             confirmAndInstallTtsVoice(event.language)
                     }
@@ -265,15 +266,15 @@ abstract class VisualReaderFragment : BaseReaderFragment() {
                 // Improve performances by throttling the moves to maximum one per second.
                 .throttleLatest(1.seconds)
                 .observeWhenStarted(viewLifecycleOwner) { locator ->
-                    navigator.go(locator, animated = false)
+                    //navigator.go(locator, animated = false)
                 }
 
             // Prevent interacting with the publication (including page turns) while the TTS is
             // playing.
-            isPlaying
-                .observeWhenStarted(viewLifecycleOwner) { isPlaying ->
-                    disableTouches = isPlaying
-                }
+//            isPlaying
+//                .observeWhenStarted(viewLifecycleOwner) { isPlaying ->
+//                    disableTouches = isPlaying
+//                }
 
             // Highlight the currently spoken utterance.
             (navigator as? DecorableNavigator)?.let { navigator ->

@@ -19,6 +19,7 @@ import org.readium.navigator.media.tts.android.AndroidTtsEngine
 import org.readium.navigator.media.tts.android.AndroidTtsPreferences
 import org.readium.navigator.media.tts.android.AndroidTtsSettings
 import org.readium.r2.navigator.Navigator
+import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.VisualNavigator
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
@@ -93,6 +94,7 @@ class TtsViewModel private constructor(
         mediaServiceFacade.session.value?.ttsNavigator
 
     private var launchJob: Job? = null
+    private var debugJob: Job? = null
 
     private val _events: Channel<Event> =
         Channel(Channel.BUFFERED)
@@ -125,12 +127,16 @@ class TtsViewModel private constructor(
     val position: StateFlow<Locator?> =
         mediaServiceFacade.session.flatMapLatest { session ->
             session?.navigator?.currentLocator ?: MutableStateFlow(null)
+        }.onEach {
+            Timber.d("!!!!!!!!!! `TTS position` $it")
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val highlight: StateFlow<Locator?> =
         mediaServiceFacade.session.flatMapLatest { session ->
             session?.ttsNavigator?.location?.map { it.utteranceLocator }
                 ?: MutableStateFlow(null)
+        }.onEach {
+            Timber.d("!!!!!!!!!! `TTS utterance` $it")
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     init {
@@ -193,6 +199,20 @@ class TtsViewModel private constructor(
         }
 
         ttsNavigator.play()
+
+        debugJob?.cancel()
+        debugJob = viewModelScope.launch {
+            navigator.currentLocator
+                .filter { it != ttsNavigator.currentLocator.value }
+                .collect { locator ->
+                    val firstVisibleItem = (navigator as? VisualNavigator)?.firstVisibleElementLocator()
+                    if(firstVisibleItem != null) {
+                        Timber.d("!!!!!!!!!! `TTS.go` $firstVisibleItem")
+
+                        ttsNavigator.go(firstVisibleItem)
+                    }
+                }
+        }
     }
 
     fun stop() {
