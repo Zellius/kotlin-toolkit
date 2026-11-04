@@ -45,7 +45,7 @@ A number of features are implemented only for some publication formats.
 | Feature                                                                                           | Status |
 |---------------------------------------------------------------------------------------------------|:------:|
 | [OPDS Catalog 1.2](https://specs.opds.io/opds-1.2)                                                |   ✅    | 
-| [OPDS Catalog 2.0](https://drafts.opds.io/opds-2.0)                                               |   ✅    | 
+| [OPDS Catalog 2.0](https://specs.opds.io/opds-2.0)                                               |   ✅    | 
 | [Authentication for OPDS](https://drafts.opds.io/authentication-for-opds-1.0.html)                |   📆   |
 | [Readium LCP Automatic Key Retrieval](https://readium.org/lcp-specs/notes/lcp-key-retrieval.html) |   📆   |
 
@@ -73,7 +73,9 @@ Guides are available to help you make the most of the toolkit.
 * [Navigator](docs/guides/navigator/navigator.md) - an overview of the Navigator to render a `Publication`'s content to the user
 * [Configuring the Navigator](docs/guides/navigator/preferences.md) – setup and render Navigator user preferences (font size, colors, etc.)
 * [Font families in the EPUB navigator](docs/guides/navigator/epub-fonts.md) – support custom font families with reflowable EPUB publications
+* [EPUB image viewer](docs/guides/navigator/epub-image-viewer.md) – detect when a user taps an image to present it full screen
 * [Media Navigator](docs/guides/navigator/media-navigator.md) – use the Media Navigator to read aloud a publication (audiobook, TTS, etc.)
+* [Web Navigators](docs/guides/navigator/web-navigators.md) - a guide to the new alpha Compose-based navigators for EPUB
 
 ### DRM
 
@@ -85,7 +87,8 @@ Guides are available to help you make the most of the toolkit.
 
 | Readium | Android min SDK | Android compile SDK | Kotlin compiler (✻) | Gradle (✻) |
 |---------|-----------------|---------------------|---------------------|------------|
-| `develop` | 23 | 36 | 2.3.20 | 9.1.0 |
+| `develop` | 24 | 37 | 2.4.20 | 9.7.0 |
+| 3.4.0 | 24 | 37 | 2.4.20 | 9.7.0 |
 | 3.2.0 | 23 | 36 | 2.3.20 | 9.1.0 |
 | 3.1.2 | 23 | 36 | 2.1.21 | 8.14.1 |
 | 3.1.0 | 21 | 35 | 2.1.20 | 8.13 |
@@ -100,7 +103,7 @@ Readium modules are distributed with [Maven Central](https://search.maven.org/se
 
 ```groovy
 buildscript {
-    ext.readium_version = '3.3.0'
+    ext.readium_version = '3.4.0'
 }
 
 allprojects {

@@ -20,7 +20,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -45,6 +44,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -68,6 +69,7 @@ import org.readium.r2.navigator.util.BaseActionModeCallback
 import org.readium.r2.navigator.util.DirectionalNavigationAdapter
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
+import org.readium.r2.shared.publication.services.content.Content
 import org.readium.r2.shared.util.Language
 import org.readium.r2.testapp.R
 import org.readium.r2.testapp.data.model.Highlight
@@ -122,6 +124,18 @@ abstract class VisualReaderFragment : BaseReaderFragment() {
         }
 
         (navigator as VisualNavigator).apply {
+            // Present the image full screen when the user taps it. Bind it before the
+            // toggle-system-UI listener so it takes precedence.
+            addInputListener(object : InputListener {
+                @OptIn(ExperimentalReadiumApi::class)
+                override fun onTap(event: TapEvent): Boolean {
+                    val image = event.targetElement?.content as? Content.ImageElement
+                        ?: return false
+                    showImageViewer(image)
+                    return true
+                }
+            })
+
             addInputListener(object : InputListener {
                 override fun onTap(event: TapEvent): Boolean {
                     requireActivity().toggleSystemUi()
@@ -518,13 +532,12 @@ abstract class VisualReaderFragment : BaseReaderFragment() {
                 .create()
 
             fun dismiss() {
+                alert.window?.let { window ->
+                    WindowCompat.getInsetsController(window, note).hide(WindowInsetsCompat.Type.ime())
+                }
+
                 alert.dismiss()
                 mode?.finish()
-                (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                    .hideSoftInputFromWindow(
-                        note.applicationWindowToken,
-                        InputMethodManager.HIDE_NOT_ALWAYS
-                    )
             }
 
             with(view) {
@@ -615,6 +628,14 @@ abstract class VisualReaderFragment : BaseReaderFragment() {
                 0
             )
         }
+    }
+
+    // Image Viewer
+
+    @OptIn(ExperimentalReadiumApi::class)
+    private fun showImageViewer(image: Content.ImageElement) {
+        ImageViewerDialogFragment.newInstance(image)
+            .show(childFragmentManager, ImageViewerDialogFragment.TAG)
     }
 
     fun updateSystemUiVisibility() {
