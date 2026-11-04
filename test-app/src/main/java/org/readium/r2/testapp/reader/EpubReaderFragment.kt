@@ -28,7 +28,7 @@ import org.readium.r2.navigator.DecorableNavigator
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.epub.*
 import org.readium.r2.navigator.epub.css.FontStyle
-import org.readium.r2.navigator.epub.resources.addFontFamilyDeclaration
+import org.readium.r2.navigator.epub.css.FontWeight
 import org.readium.r2.navigator.html.HtmlDecorationTemplate
 import org.readium.r2.navigator.html.HtmlDecorationTemplates
 import org.readium.r2.navigator.html.toCss
@@ -73,15 +73,35 @@ class EpubReaderFragment : VisualReaderFragment() {
                 initialPreferences = readerData.preferencesManager.preferences.value,
                 listener = model,
                 configuration = EpubNavigatorFragment.Configuration {
+                    val resources = requireContext().resources
+
+                    val robotoMonoRegular = requireNotNull(
+                        EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_regular)
+                    )
+
+                    val robotoMonoItalic = requireNotNull(
+                        EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_italic)
+                    )
+
+                    val robotoMonoBold = requireNotNull(
+                        EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_bold)
+                    )
+
+                    val robotoMonoBoldItalic = requireNotNull(
+                        EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_bold_italic)
+                    )
+
                     // To customize the text selection menu.
                     selectionActionModeCallback = customSelectionActionModeCallback
 
-                    // App assets which will be accessible from the EPUB resources.
+                    // App assets and Android resources accessible from the EPUB resources.
                     // You can use simple glob patterns, such as "images/.*" to allow several
                     // assets in one go.
                     servedAssets = listOf(
                         // For the custom font Literata.
                         "fonts/.*",
+                        // For Roboto Mono font files in Android resources
+                        EpubNavigatorFragment.androidResourcePath("font/roboto_mono_.*"),
                         // Icon for the annotation side mark, see [annotationMarkTemplate].
                         "annotation-icon.svg"
                     )
@@ -112,12 +132,29 @@ class EpubReaderFragment : VisualReaderFragment() {
                         }
                     }
 
-                    // Declare custom fron family from Android resources
-                    addFontFamilyDeclaration(
-                        fontFamily = FontFamily.ROBOTO_MONO,
-                        context = requireContext(),
-                        fontFamilyResId = R.font.roboto_mono
-                    )
+                    // Declare a custom font family from Android res/font files.
+                    addFontFamilyDeclaration(FontFamily.ROBOTO_MONO) {
+                        addFontFace {
+                            addSource(robotoMonoRegular)
+                            setFontWeight(FontWeight.NORMAL)
+                            setFontStyle(FontStyle.NORMAL)
+                        }
+                        addFontFace {
+                            addSource(robotoMonoItalic)
+                            setFontWeight(FontWeight.NORMAL)
+                            setFontStyle(FontStyle.ITALIC)
+                        }
+                        addFontFace {
+                            addSource(robotoMonoBold)
+                            setFontWeight(FontWeight.BOLD)
+                            setFontStyle(FontStyle.NORMAL)
+                        }
+                        addFontFace {
+                            addSource(robotoMonoBoldItalic)
+                            setFontWeight(FontWeight.BOLD)
+                            setFontStyle(FontStyle.ITALIC)
+                        }
+                    }
                 }
             )
 

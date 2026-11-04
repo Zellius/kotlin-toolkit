@@ -17,7 +17,6 @@ import androidx.webkit.WebViewAssetLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.readium.r2.navigator.epub.css.ReadiumCss
-import org.readium.r2.navigator.epub.resources.ANDROID_RESOURCES_PATH_PREFIX
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.publication.Href
@@ -51,6 +50,8 @@ internal class WebViewServer(
     companion object {
         const val PACKAGE_HOSTNAME = "readium_package"
         const val ASSETS_HOSTNAME = "readium_assets"
+
+        const val ANDROID_RES_PATH_PREFIX = "android_res"
 
         val packageBaseHref = AbsoluteUrl("https://$PACKAGE_HOSTNAME/")!!
         val assetsBaseHref = AbsoluteUrl("https://$ASSETS_HOSTNAME/")!!
@@ -276,13 +277,7 @@ internal class WebViewServer(
     private val assetsLoader =
         WebViewAssetLoader.Builder()
             .setDomain(ASSETS_HOSTNAME)
-            .addPathHandler(
-                "/$ANDROID_RESOURCES_PATH_PREFIX/",
-                WebViewAssetLoader.ResourcesPathHandler(application)
-            )
-            .addPathHandler(
-                "/",
-                WebViewAssetLoader.AssetsPathHandler(application)
-            )
+            .addPathHandler("/$ANDROID_RES_PATH_PREFIX/", WebViewAssetLoader.ResourcesPathHandler(application))
+            .addPathHandler("/", WebViewAssetLoader.AssetsPathHandler(application))
             .build()
 }
