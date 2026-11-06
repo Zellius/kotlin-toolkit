@@ -13,7 +13,6 @@ import android.graphics.PointF
 import android.graphics.RectF
 import android.os.Bundle
 import android.util.LayoutDirection
-import android.util.TypedValue
 import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.View
@@ -35,7 +34,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withStarted
 import androidx.viewpager.widget.ViewPager
-import java.io.File
 import kotlin.math.ceil
 import kotlin.reflect.KClass
 import kotlinx.coroutines.Job
@@ -158,6 +156,14 @@ public class EpubNavigatorFragment internal constructor(
         var servedAssets: List<String>,
 
         /**
+         * Android file resource IDs available to EPUB resources under
+         * https://readium_resources/, for example `R.font.my_font`.
+         * Non-file-backed or unknown resource IDs are ignored.
+         */
+        @ExperimentalReadiumApi
+        var servedAndroidResources: List<Int>,
+
+        /**
          * Readium CSS reading system settings.
          *
          * See https://readium.org/readium-css/docs/CSS19-api.html#reading-system-styles
@@ -224,8 +230,10 @@ public class EpubNavigatorFragment internal constructor(
             disablePageTurnsWhileScrolling: Boolean = false,
             selectionActionModeCallback: ActionMode.Callback? = null,
             shouldApplyInsetsPadding: Boolean? = true,
+            servedAndroidResources: List<Int> = emptyList(),
         ) : this(
             servedAssets = servedAssets,
+            servedAndroidResources = servedAndroidResources,
             readiumCssRsProperties = readiumCssRsProperties,
             decorationTemplates = decorationTemplates,
             disablePageTurnsWhileScrolling = disablePageTurnsWhileScrolling,
@@ -1158,53 +1166,12 @@ public class EpubNavigatorFragment internal constructor(
          * Returns a URL to an Android file resource served in the EPUB web views,
          * such as a font in `res/font`.
          *
-         * The resource must also be allowed by [Configuration.servedAssets].
+         * The resource must also be allowed by [Configuration.servedAndroidResources].
          *
          * @return `null` if [resId] does not identify a file-backed resource.
          */
         public fun androidResourceUrl(resources: Resources, @AnyRes resId: Int): Url? =
-            androidResourcePath(resources, resId)?.let(::assetUrl)
-
-        /**
-         * Returns the served asset path for an Android resource.
-         *
-         * @param path is relative to the Android `res` directory, for example
-         * `font/my_font.ttf`. Simple glob patterns such as `font/my_font_.*`
-         * can be used with [Configuration.servedAssets].
-         */
-        public fun androidResourcePath(path: String): String =
-            "${WebViewServer.ANDROID_RES_PATH_PREFIX}/$path"
-
-        /**
-         * Returns the served asset path of an Android file resource.
-         *
-         * For example, `R.font.my_font` may resolve to
-         * `android_res/font/my_font.ttf`.
-         *
-         * @return `null` if [resId] does not identify a file-backed resource.
-         */
-        public fun androidResourcePath(resources: Resources, resId: Int): String? =
-            try {
-                val value = TypedValue().also {
-                    resources.getValue(resId, it, true)
-                }
-
-                val filePath = value.string?.toString()
-                    ?.takeIf { it.startsWith("res/") }
-                    ?: return null
-
-                val extension = File(filePath).extension
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { ".$it" }
-                    .orEmpty()
-
-                val type = resources.getResourceTypeName(resId)
-                val name = resources.getResourceEntryName(resId)
-
-                androidResourcePath("$type/$name$extension")
-            } catch (_: Resources.NotFoundException) {
-                null
-            }
+            WebViewServer.androidResourceUrl(resources, resId)
     }
 }
 

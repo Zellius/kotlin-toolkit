@@ -11,6 +11,7 @@ import kotlin.test.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.readium.r2.navigator.R
+import org.readium.r2.shared.util.AbsoluteUrl
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
@@ -18,14 +19,49 @@ import org.robolectric.RuntimeEnvironment
 class AndroidResourceUrlTest {
 
     @Test
-    fun `Create a URL for an Android file resource`() {
+    fun `Create separate URLs for Android resources and app assets`() {
         val resources = RuntimeEnvironment.getApplication().resources
 
         assertEquals(
-            EpubNavigatorFragment.assetUrl(
-                EpubNavigatorFragment.androidResourcePath("drawable/readium_media_notification_fastforward.xml")
-            ),
+            AbsoluteUrl("${WebViewServer.resourcesBaseHref}drawable/readium_media_notification_fastforward.xml")!!,
             EpubNavigatorFragment.androidResourceUrl(
+                resources,
+                R.drawable.readium_media_notification_fastforward
+            )
+        )
+
+        assertEquals(
+            AbsoluteUrl("${WebViewServer.assetsBaseHref}android_res/drawable/readium_media_notification_fastforward.xml")!!,
+            EpubNavigatorFragment.assetUrl("android_res/drawable/readium_media_notification_fastforward.xml")
+        )
+    }
+
+    @Test
+    fun `Return null for an unknown Android resource`() {
+        val resources = RuntimeEnvironment.getApplication().resources
+
+        assertNull(EpubNavigatorFragment.androidResourceUrl(resources, 0))
+    }
+
+    @Test
+    fun `Return null for a string resource`() {
+        val resources = RuntimeEnvironment.getApplication().resources
+
+        assertNull(
+            EpubNavigatorFragment.androidResourceUrl(
+                resources,
+                R.string.readium_media_notification_channel_name
+            )
+        )
+    }
+
+    @Test
+    fun `Create a server URL for an Android file resource`() {
+        val resources = RuntimeEnvironment.getApplication().resources
+
+        assertEquals(
+            AbsoluteUrl("${WebViewServer.resourcesBaseHref}drawable/readium_media_notification_fastforward.xml")!!,
+            WebViewServer.androidResourceUrl(
                 resources,
                 R.drawable.readium_media_notification_fastforward
             )
@@ -33,9 +69,9 @@ class AndroidResourceUrlTest {
     }
 
     @Test
-    fun `Return null for an unknown resource`() {
+    fun `Return null for an unknown server resource`() {
         val resources = RuntimeEnvironment.getApplication().resources
 
-        assertNull(EpubNavigatorFragment.androidResourceUrl(resources, 0))
+        assertNull(WebViewServer.androidResourceUrl(resources, 0))
     }
 }

@@ -73,37 +73,24 @@ class EpubReaderFragment : VisualReaderFragment() {
                 initialPreferences = readerData.preferencesManager.preferences.value,
                 listener = model,
                 configuration = EpubNavigatorFragment.Configuration {
-                    val resources = requireContext().resources
-
-                    val robotoMonoRegular = requireNotNull(
-                        EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_regular)
-                    )
-
-                    val robotoMonoItalic = requireNotNull(
-                        EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_italic)
-                    )
-
-                    val robotoMonoBold = requireNotNull(
-                        EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_bold)
-                    )
-
-                    val robotoMonoBoldItalic = requireNotNull(
-                        EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_bold_italic)
-                    )
-
                     // To customize the text selection menu.
                     selectionActionModeCallback = customSelectionActionModeCallback
 
-                    // App assets and Android resources accessible from the EPUB resources.
+                    // App assets accessible from the EPUB resources.
                     // You can use simple glob patterns, such as "images/.*" to allow several
                     // assets in one go.
                     servedAssets = listOf(
                         // For the custom font Literata.
                         "fonts/.*",
-                        // For Roboto Mono font files in Android resources
-                        EpubNavigatorFragment.androidResourcePath("font/roboto_mono_.*"),
                         // Icon for the annotation side mark, see [annotationMarkTemplate].
                         "annotation-icon.svg"
+                    )
+                    // For Roboto Mono font files in Android resources.
+                    servedAndroidResources = listOf(
+                        R.font.roboto_mono_regular,
+                        R.font.roboto_mono_italic,
+                        R.font.roboto_mono_bold,
+                        R.font.roboto_mono_bold_italic
                     )
 
                     // Enable experimental decorations positioning that places highlights behind
@@ -133,24 +120,33 @@ class EpubReaderFragment : VisualReaderFragment() {
                     }
 
                     // Declare a custom font family from Android res/font files.
+                    val resources = requireContext().resources
                     addFontFamilyDeclaration(FontFamily.ROBOTO_MONO) {
                         addFontFace {
-                            addSource(robotoMonoRegular)
+                            addSource(
+                                requireNotNull(EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_regular))
+                            )
                             setFontWeight(FontWeight.NORMAL)
                             setFontStyle(FontStyle.NORMAL)
                         }
                         addFontFace {
-                            addSource(robotoMonoItalic)
+                            addSource(
+                                requireNotNull(EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_italic))
+                            )
                             setFontWeight(FontWeight.NORMAL)
                             setFontStyle(FontStyle.ITALIC)
                         }
                         addFontFace {
-                            addSource(robotoMonoBold)
+                            addSource(
+                                requireNotNull(EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_bold))
+                            )
                             setFontWeight(FontWeight.BOLD)
                             setFontStyle(FontStyle.NORMAL)
                         }
                         addFontFace {
-                            addSource(robotoMonoBoldItalic)
+                            addSource(
+                                requireNotNull(EpubNavigatorFragment.androidResourceUrl(resources, R.font.roboto_mono_bold_italic))
+                            )
                             setFontWeight(FontWeight.BOLD)
                             setFontStyle(FontStyle.ITALIC)
                         }
